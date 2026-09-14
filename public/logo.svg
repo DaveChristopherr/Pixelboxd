@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <!-- Retro Pixelated Background / Film Card -->
+  <rect x="2" y="2" width="44" height="44" fill="#141820" stroke="#263141" stroke-width="2"/>
+  
+  <!-- Pixel Three Dots / Squares of Letterboxd -->
+  <!-- Orange Square -->
+  <rect x="8" y="18" width="12" height="12" fill="#ff8000" stroke="#101319" stroke-width="1.5"/>
+  <!-- Green Square (center) -->
+  <rect x="18" y="18" width="12" height="12" fill="#00e461" stroke="#101319" stroke-width="1.5"/>
+  <!-- Cyan Square -->
+  <rect x="28" y="18" width="12" height="12" fill="#00b4fc" stroke="#101319" stroke-width="1.5"/>
+  
+  <!-- Subtle pixel grid highlights -->
+  <rect x="9" y="19" width="3" height="3" fill="#ffa64d"/>
+  <rect x="19" y="19" width="3" height="3" fill="#47ff96"/>
+  <rect x="29" y="19" width="3" height="3" fill="#66d1ff"/>
+</svg>
