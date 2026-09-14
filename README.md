@@ -130,4 +130,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 Created by **Dave Christopher**  
 - Website: [davechristopher.me](https://davechristopher.me)
-- GitHub: [@davechristopher](https://github.com)
+- GitHub: [@DaveChristopherr](https://github.com/DaveChristopherr)
