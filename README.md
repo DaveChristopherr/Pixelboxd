@@ -123,11 +123,3 @@ Pixeboxd is ready to deploy to any cloud or container platform:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-## Author
-
-Created by **Dave Christopher**  
-- Website: [davechristopher.me](https://davechristopher.me)
-- GitHub: [@DaveChristopherr](https://github.com/DaveChristopherr)
