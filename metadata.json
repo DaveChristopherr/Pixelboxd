@@ -1,0 +1,6 @@
+{
+  "name": "Pixeboxd: Guess the Movie by Pixelated Poster",
+  "description": "An interactive Letterboxd-styled movie guessing game featuring pixelated TMDB posters, custom list importer, live autocomplete, and cinematic challenges.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

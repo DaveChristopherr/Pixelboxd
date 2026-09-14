@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixeboxd — Guess the Movie by Pixelated Poster</title>
+    <meta name="description" content="An interactive Letterboxd-styled movie guessing game featuring pixelated TMDB posters, custom list importer, live autocomplete, and retro challenges." />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="bg-[#101319] text-[#ffffff] min-h-screen font-pixel antialiased selection:bg-[#00e461] selection:text-[#14181c]">
+    <!-- Retro Pixel Confetti Celebration Canvas -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden w-full h-full"></canvas>
+
+    <div id="app" class="flex flex-col min-h-screen">
+      <!-- Header -->
+      <header class="border-b-2 border-[#263141] bg-[#141820]/95 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between">
+          <div class="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer group shrink-0" id="logo-btn" title="Pixeboxd Home">
+            <!-- Pixelated Three Squares Logo (Orange, Green, Light Blue) -->
+            <div class="flex items-center -space-x-1">
+              <div class="w-3.5 h-3.5 bg-[#ff8000] border border-[#101319] shadow-[1px_1px_0px_#000]"></div>
+              <div class="w-3.5 h-3.5 bg-[#00e461] border border-[#101319] shadow-[1px_1px_0px_#000]"></div>
+              <div class="w-3.5 h-3.5 bg-[#00b4fc] border border-[#101319] shadow-[1px_1px_0px_#000]"></div>
+            </div>
+            <div>
+              <h1 class="font-pixel text-[11px] sm:text-xs tracking-tight text-white flex items-center gap-1.5 sm:gap-2">
+                PIXEBOXD <span class="font-pixel text-[7px] px-1.5 py-0.5 bg-[#263141] text-[#00e461] hidden sm:inline-block border border-[#3e4d63]">RETRO</span>
+              </h1>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-1.5 sm:space-x-3">
+            <div class="flex items-center space-x-1.5 sm:space-x-2">
+              <div class="flex items-center gap-1 bg-[#161b24] px-2 sm:px-3 py-1.5 pixel-box shadow-none">
+                <span class="text-[#678] font-pixel text-[8px] sm:text-[9px]">STR:</span>
+                <span id="streak-val" class="font-bold text-[#00e461] font-pixel text-[9px] sm:text-[10px]">0</span>
+              </div>
+              <div class="flex items-center gap-1 bg-[#161b24] px-2 sm:px-3 py-1.5 pixel-box shadow-none hidden xs:flex">
+                <span class="text-[#678] font-pixel text-[8px] sm:text-[9px]">SCR:</span>
+                <span id="score-val" class="font-bold text-white font-pixel text-[9px] sm:text-[10px]">0</span>
+              </div>
+            </div>
+
+            <button id="stats-btn" class="px-2.5 sm:px-3.5 py-1.5 pixel-button-dark text-[9px] sm:text-[10px] font-pixel transition flex items-center gap-1.5 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-[#9ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span class="hidden sm:inline">STATS</span>
+            </button>
+            <button id="rules-btn" class="px-2.5 sm:px-3.5 py-1.5 pixel-button-dark text-[9px] sm:text-[10px] font-pixel transition flex items-center gap-1.5 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-[#9ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="hidden sm:inline">HELP</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col items-center justify-center">
+        
+        <!-- Category Selection View (Game Setup) -->
+        <div id="setup-view" class="w-full max-w-2xl pixel-box p-4 sm:p-7 md:p-8 animate-fadeIn">
+          <div class="text-center mb-6">
+            <h2 class="font-pixel text-[11px] sm:text-xs md:text-sm tracking-tight mb-2.5 text-white leading-relaxed">GUESS THE MOVIE BY PIXELATED POSTER</h2>
+            <p class="text-[#9ab] text-[9px] sm:text-[10px] leading-[2.1] font-pixel">SELECT AN OFFICIAL LETTERBOXD LIST OR IMPORT A CUSTOM LIST URL.</p>
+          </div>
+
+          <!-- Official Lists Selection Grid -->
+          <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+            <!-- Dynamically populated default lists -->
+          </div>
+
+          <!-- Custom Letterboxd List Importer Section -->
+          <div class="pixel-box p-3.5 sm:p-4 mb-6">
+            <label class="block font-pixel text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9ab] mb-2.5">IMPORT CUSTOM LETTERBOXD LIST (30-50 FILMS)</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input 
+                type="text" 
+                id="custom-list-input" 
+                placeholder="https://letterboxd.com/username/list/..." 
+                class="flex-1 pixel-input px-3.5 py-2.5 text-[9px] sm:text-[10px] outline-none transition font-pixel"
+              />
+              <button 
+                id="import-list-btn"
+                class="px-5 py-2.5 pixel-button-dark font-pixel text-[9px] sm:text-[10px] transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <svg class="w-3.5 h-3.5 text-[#00e461]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span>IMPORT</span>
+              </button>
+            </div>
+            <p id="import-status-text" class="text-[9px] sm:text-[10px] text-[#9ab] mt-2.5 hidden font-pixel leading-relaxed transition-all"></p>
+          </div>
+
+          <div class="flex justify-center">
+            <button id="start-game-btn" class="w-full sm:w-auto px-8 py-3.5 sm:py-4 pixel-button-green font-pixel text-[11px] sm:text-xs tracking-wide transition duration-150 flex items-center justify-center gap-2 cursor-pointer">
+              <span>START CHALLENGE</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Gameplay View -->
+        <div id="game-view" class="w-full max-w-2xl hidden flex-col items-center animate-fadeIn">
+          
+          <!-- Game Info Bar -->
+          <div class="w-full flex items-center justify-between mb-3 sm:mb-4 pixel-box px-3.5 sm:px-4 py-2.5 sm:py-3 text-[10px]">
+            <div class="flex items-center gap-2 text-[#9ab] truncate mr-2">
+              <span class="font-pixel text-[8px] sm:text-[9px]">LIST:</span>
+              <span id="current-category-name" class="font-semibold text-white truncate max-w-[150px] sm:max-w-xs font-pixel text-[9px] sm:text-[10px]">Top 500 Films</span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+              <span class="text-[#9ab] font-pixel text-[8px] sm:text-[9px] hidden xs:inline">ATTEMPTS:</span>
+              <div id="attempts-indicators" class="flex gap-1 sm:gap-1.5">
+                <!-- Attempt indicators -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Poster Canvas Container with Retro Scanline Styling -->
+          <div id="poster-card-container" class="relative w-full pixel-box retro-scanlines overflow-hidden flex items-center justify-center p-4 sm:p-6 mb-4 sm:mb-6 transition-all" style="min-height: 350px; max-height: 480px;">
+            <div id="poster-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-[#161b24] z-20">
+              <div class="w-8 h-8 border-4 border-[#00e461] border-t-transparent animate-spin mb-3"></div>
+              <p class="text-[9px] sm:text-[10px] text-[#9ab] font-pixel tracking-wider">LOADING POSTER...</p>
+            </div>
+            
+            <canvas id="poster-canvas" class="max-h-[360px] sm:max-h-[400px] w-auto shadow-2xl object-contain transition-all duration-300"></canvas>
+            
+            <!-- Pixel Level Badge -->
+            <div class="absolute bottom-3 right-3 z-10 bg-[#161b24] border-2 border-[#323d4e] text-[8px] sm:text-[9px] font-pixel text-[#9ab] px-2.5 py-1.5 flex items-center gap-1.5 pointer-events-none shadow-[2px_2px_0px_#000]">
+              <span>CLARITY:</span>
+              <span id="pixel-level-badge" class="font-semibold text-[#00e461]">LVL 1</span>
+            </div>
+          </div>
+
+          <!-- Hints Container -->
+          <div id="hints-container" class="w-full mb-4 sm:mb-6 space-y-2 hidden animate-fadeIn">
+            <div class="font-pixel text-[8px] sm:text-[9px] uppercase tracking-wider text-[#678] px-1">UNLOCKED CLUES</div>
+            <div id="hints-list" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <!-- Hint items -->
+            </div>
+          </div>
+
+          <!-- Search & Guess Form -->
+          <div id="guess-form-container" class="w-full relative mb-4 sm:mb-6">
+            <form id="guess-form" class="relative flex items-center" onsubmit="return false;">
+              <span class="absolute left-3.5 sm:left-4 text-[#678] flex items-center pointer-events-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </span>
+              <input 
+                type="text" 
+                id="movie-search-input" 
+                placeholder="TYPE MOVIE TITLE..." 
+                autocomplete="off"
+                class="w-full pixel-input pl-11 sm:pl-12 pr-24 sm:pr-28 py-3 sm:py-3.5 text-[9px] sm:text-[10px] outline-none transition font-pixel"
+              />
+              <button 
+                type="submit"
+                id="submit-guess-btn"
+                class="absolute right-1.5 sm:right-2 px-4 sm:px-5 py-2 sm:py-2.5 pixel-button-dark font-pixel text-[9px] sm:text-[10px] transition cursor-pointer"
+              >
+                GUESS
+              </button>
+            </form>
+
+            <!-- Autocomplete Dropdown -->
+            <div id="autocomplete-dropdown" class="absolute left-0 right-0 mt-2 pixel-box shadow-2xl z-50 max-h-72 overflow-y-auto hidden divide-y-2 divide-[#263141]">
+              <!-- Suggestions list -->
+            </div>
+          </div>
+
+          <!-- Result Card (Hidden until win or loss) -->
+          <div id="result-card" class="w-full pixel-box p-4 sm:p-6 hidden animate-pixel-pop mb-6">
+            <div class="flex items-start justify-between mb-4 gap-3">
+              <div>
+                <div id="result-status-badge" class="inline-block px-2.5 py-1 font-pixel text-[9px] sm:text-[10px] uppercase tracking-wider mb-2">CORRECT!</div>
+                <h3 id="result-title" class="text-xs sm:text-sm font-bold text-white tracking-tight font-pixel">Movie Title (2024)</h3>
+                <p id="result-genres" class="text-[9px] sm:text-[10px] text-[#9ab] mt-1.5 font-pixel leading-relaxed">Action • Sci-Fi • Thriller</p>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-[8px] sm:text-[9px] font-pixel text-[#678]">TMDB RATING</div>
+                <div id="result-rating" class="text-xs sm:text-sm font-bold text-[#00e461] flex items-center justify-end gap-1 font-pixel mt-1">
+                  <svg class="w-3.5 h-3.5 fill-[#00e461]" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <span>8.4</span>
+                </div>
+              </div>
+            </div>
+
+            <p id="result-overview" class="text-[9px] sm:text-[10px] text-[#cbd5e1] leading-[2.1] mb-5 font-pixel">Movie overview description goes here...</p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t-2 border-[#263141]">
+              <a id="view-letterboxd-btn" href="#" target="_blank" rel="noopener noreferrer" class="text-[9px] sm:text-[10px] text-[#00e461] hover:underline font-pixel transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>VIEW ON LETTERBOXD</span>
+              </a>
+              <button id="next-movie-btn" class="w-full sm:w-auto px-6 py-2.5 sm:py-3 pixel-button-green transition flex items-center justify-center gap-2 cursor-pointer font-pixel text-[9px] sm:text-[10px]">
+                <span>NEXT MOVIE</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button id="back-to-setup-btn" class="text-[9px] sm:text-[10px] font-pixel text-[#678] hover:text-[#9ab] underline transition cursor-pointer flex items-center gap-1.5 mx-auto">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+              <span>CHANGE LIST OR IMPORT URL</span>
+            </button>
+          </div>
+
+        </div>
+
+      </main>
+
+      <!-- Footer: ONLY Created by Dave Christopher -->
+      <footer class="border-t-2 border-[#263141] py-5 text-center font-pixel text-[9px] sm:text-[10px] text-[#9ab] bg-[#141820]/80 mt-auto">
+        <p class="tracking-wide">
+          Created by <a href="https://davechristopher.me" target="_blank" rel="noopener noreferrer" class="text-[#00e461] hover:underline font-bold transition-colors">Dave Christopher</a>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Modals (Stats & Rules) -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+      
+      <!-- Stats Modal -->
+      <div id="stats-modal" class="w-full max-w-md pixel-box p-4 sm:p-6 hidden animate-fadeIn">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-pixel text-[11px] sm:text-xs text-white">GAME STATISTICS</h3>
+          <button class="close-modal-btn text-[#678] hover:text-white text-xs cursor-pointer font-pixel">✕</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="bg-[#101319] p-3 sm:p-4 pixel-box text-center">
+            <div id="stat-played" class="font-pixel text-sm sm:text-base font-bold text-white">0</div>
+            <div class="font-pixel text-[8px] sm:text-[9px] text-[#9ab] mt-2">GAMES PLAYED</div>
+          </div>
+          <div class="bg-[#101319] p-3 sm:p-4 pixel-box text-center">
+            <div id="stat-won" class="font-pixel text-sm sm:text-base font-bold text-[#00e461]">0</div>
+            <div class="font-pixel text-[8px] sm:text-[9px] text-[#9ab] mt-2">GAMES WON</div>
+          </div>
+          <div class="bg-[#101319] p-3 sm:p-4 pixel-box text-center">
+            <div id="stat-streak" class="font-pixel text-sm sm:text-base font-bold text-[#ff8000]">0</div>
+            <div class="font-pixel text-[8px] sm:text-[9px] text-[#9ab] mt-2">CURRENT STREAK</div>
+          </div>
+          <div class="bg-[#101319] p-3 sm:p-4 pixel-box text-center">
+            <div id="stat-best-streak" class="font-pixel text-sm sm:text-base font-bold text-white">0</div>
+            <div class="font-pixel text-[8px] sm:text-[9px] text-[#9ab] mt-2">BEST STREAK</div>
+          </div>
+        </div>
+        
+        <button class="close-modal-btn w-full py-3 pixel-button-dark transition cursor-pointer font-pixel text-[9px] sm:text-[10px]">CLOSE</button>
+      </div>
+
+      <!-- Rules Modal -->
+      <div id="rules-modal" class="w-full max-w-md pixel-box p-4 sm:p-6 hidden animate-fadeIn">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-pixel text-[11px] sm:text-xs text-white">HOW TO PLAY</h3>
+          <button class="close-modal-btn text-[#678] hover:text-white text-xs cursor-pointer font-pixel">✕</button>
+        </div>
+        <div class="space-y-3.5 text-[8px] sm:text-[9px] text-[#cbd5e1] mb-5 font-pixel leading-[2.1]">
+          <div class="flex items-start gap-2.5">
+            <div class="w-4 h-4 bg-[#263141] border border-[#3e4d63] text-[#00e461] flex items-center justify-center font-bold shrink-0 text-[8px] mt-0.5">1</div>
+            <p><strong class="text-white">PIXEL POSTER:</strong> EACH ROUND SHOWS A PIXELATED POSTER STARTING BLURRED.</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <div class="w-4 h-4 bg-[#263141] border border-[#3e4d63] text-[#00e461] flex items-center justify-center font-bold shrink-0 text-[8px] mt-0.5">2</div>
+            <p><strong class="text-white">LETTERBOXD LISTS:</strong> PLAY TOP 500 FILMS, FAN FAVORITES, ONE MILLION CLUB, OR IMPORT ANY CUSTOM LIST URL.</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <div class="w-4 h-4 bg-[#263141] border border-[#3e4d63] text-[#00e461] flex items-center justify-center font-bold shrink-0 text-[8px] mt-0.5">3</div>
+            <p><strong class="text-white">CLUES & CLARITY:</strong> EACH WRONG GUESS REVEALS A CLUE (YEAR, GENRE, LANGUAGE) AND SHARPENS THE POSTER.</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <div class="w-4 h-4 bg-[#263141] border border-[#3e4d63] text-[#00e461] flex items-center justify-center font-bold shrink-0 text-[8px] mt-0.5">4</div>
+            <p><strong class="text-white">5 ATTEMPTS:</strong> GUESS WITHIN 5 TRIES TO PRESERVE YOUR STREAK AND SCORE BIG.</p>
+          </div>
+        </div>
+        <button class="close-modal-btn w-full py-3 pixel-button-dark transition cursor-pointer font-pixel text-[9px] sm:text-[10px]">GOT IT</button>
+      </div>
+
+    </div>
+
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

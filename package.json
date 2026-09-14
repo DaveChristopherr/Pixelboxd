@@ -1,0 +1,24 @@
+{
+  "name": "pixeboxd",
+  "version": "1.0.0",
+  "description": "Guess the movie by pixelated poster - Letterboxd edition",
+  "author": "Dave Christopher",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "vite build && esbuild server.js --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
+    "preview": "vite preview",
+    "lint": "node -c server.js script.js"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "express": "^4.21.2",
+    "vite": "^6.2.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.1.14"
+  }
+}
